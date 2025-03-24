@@ -22,6 +22,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg 
+venv/
 
 # Ignore contents but keep directories with .gitkeep
 abstract_md/*
