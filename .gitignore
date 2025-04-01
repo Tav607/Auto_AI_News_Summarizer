@@ -24,6 +24,9 @@ var/
 *.egg 
 venv/
 
+# logs
+cron_log.txt
+
 # Ignore contents but keep directories with .gitkeep
 abstract_md/*
 !abstract_md/.gitkeep
