@@ -99,7 +99,7 @@ def fetch_markdown(client, model_id, url, batch_idx, model_id_wechat=None, model
     返回值： (idx, md_text 或 None, 错误信息或 None)
     """
     MAX_RETRIES = 10
-    UNWANTED_TEXT = "微信，是一个生活方式"
+    UNWANTED_TEXT = ["微信，是一个生活方式", "环境异常"]
     retry_count = 0
     
     # 根据URL选择模型ID
@@ -119,7 +119,13 @@ def fetch_markdown(client, model_id, url, batch_idx, model_id_wechat=None, model
             md_text = completion.choices[0].message.content
             
             # 检查是否包含不需要的文本
-            if UNWANTED_TEXT in md_text:
+            unwanted_found = False
+            for text in UNWANTED_TEXT:
+                if text in md_text:
+                    unwanted_found = True
+                    break
+                    
+            if unwanted_found:
                 retry_count += 1
                 retry_message = f"URL#{batch_idx}: 返回结果包含不需要的文本，正在重试 ({retry_count}/{MAX_RETRIES})..."
                 print(retry_message)
@@ -129,10 +135,11 @@ def fetch_markdown(client, model_id, url, batch_idx, model_id_wechat=None, model
                 if retry_count < MAX_RETRIES:
                     continue
                 else:
-                    final_message = f"URL#{batch_idx}: 已达到最大重试次数，保留当前结果并继续处理..."
+                    final_message = f"URL#{batch_idx}: 已达到最大重试次数，放弃处理此URL..."
                     print(final_message)
                     if progress_callback:
                         progress_callback(final_message)
+                    return (batch_idx, None, "包含不需要的文本并达到最大重试次数")
             
             # 如果返回文本不是以 # 开头，则截去 # 之前的部分
             if not md_text.startswith('#'):
