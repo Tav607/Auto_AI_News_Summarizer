@@ -79,11 +79,13 @@ def extract_recent_news_urls(db_path, hours_back=168, output_dir=None):
     return url_list
 
 if __name__ == "__main__":
-    # Default database path
-    db_path = str(Path.home() / "data" / "wewe-rss.db")
+    # Get the directory where this script is located
+    script_dir = Path(__file__).parent.parent
+    # Set database path relative to script directory
+    db_path = str(script_dir / "wewe-rss-data" / "wewe-rss.db")
     
-    # Default output directory is 'url' folder in current working directory
-    default_output_dir = os.path.join(os.getcwd(), "url")
+    # Default output directory is 'url' folder in script's directory
+    default_output_dir = str(Path(__file__).parent / "url")
     
     # Parse command line arguments
     if len(sys.argv) > 1:

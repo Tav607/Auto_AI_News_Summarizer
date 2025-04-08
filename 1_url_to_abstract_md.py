@@ -11,6 +11,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import time
 from threading import Lock
+from pathlib import Path
 
 # 如果你是用 volces-openai-sdk，请安装并导入它
 # from openai import OpenAI
@@ -185,13 +186,14 @@ def main(input_txt, output_md=None, progress_callback=None):
     # 如果未指定输出文件，则使用默认路径和文件名
     if output_md is None:
         # 确保输出目录存在
-        output_dir = os.path.join(".", "abstract_md")
+        script_dir = Path(__file__).parent
+        output_dir = script_dir / "abstract_md"
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         
         # 生成带时间戳的文件名
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_md = os.path.join(output_dir, f"abstract_md_{timestamp}.md")
+        output_md = str(output_dir / f"abstract_md_{timestamp}.md")
 
     # 1. 从.env文件加载环境变量
     load_dotenv()
