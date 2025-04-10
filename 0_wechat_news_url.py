@@ -6,6 +6,7 @@ import sys
 import sqlite3
 import datetime
 from pathlib import Path
+import argparse
 
 def extract_recent_news_urls(db_path, hours_back=168, output_dir=None):
     """
@@ -86,12 +87,15 @@ if __name__ == "__main__":
     
     # Default output directory is 'url' folder in script's directory
     default_output_dir = str(Path(__file__).parent / "url")
+
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description='Extract recent WeChat news URLs.')
+    parser.add_argument('--hours', type=int, default=168, 
+                        help='Number of hours to look back (default: 168)')
+    parser.add_argument('--output-dir', type=str, default=default_output_dir, 
+                        help=f'Directory to save the output file (default: {default_output_dir})')
     
-    # Parse command line arguments
-    if len(sys.argv) > 1:
-        output_dir = sys.argv[1]
-    else:
-        output_dir = default_output_dir
+    args = parser.parse_args()
     
-    # Extract URLs
-    extract_recent_news_urls(db_path, hours_back=168, output_dir=output_dir) 
+    # Extract URLs using parsed arguments
+    extract_recent_news_urls(db_path, hours_back=args.hours, output_dir=args.output_dir) 

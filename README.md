@@ -41,25 +41,23 @@ pip install -r requirements.txt
 2. 添加以下内容，替换为您的实际值:
 ```
 API_KEY=your_api_key_here
-MODEL_ID=your_model_id_here
-MODEL_ID_WECHAT=your_wechat_model_id_here  # 可选
-MODEL_ID_TECHCRUNCH=your_techcrunch_model_id_here  # 可选
-MODEL_ID_SUMMARY=your_summary_model_id_here
+MODEL_ID_ABSTRACT=your_model_id_for_abstraction
+MODEL_ID_SUMMARY=your_model_id_for_summary
 ```
 
 ### 环境变量说明:
 
-- `API_KEY`: OpenAI API密钥
-- `MODEL_ID`: 默认使用的模型ID
-- `MODEL_ID_WECHAT`: 处理微信文章时使用的模型ID（可选）
-- `MODEL_ID_TECHCRUNCH`: 处理TechCrunch文章时使用的模型ID（可选）
-- `MODEL_ID_SUMMARY`: 汇总处理所有摘要生成总结时使用的模型ID
+- `API_KEY`: DeepSeek API密钥 (或您使用的其他LLM服务商的密钥)
+- `MODEL_ID_ABSTRACT`: 用于生成单篇文章摘要的模型ID
+- `MODEL_ID_SUMMARY`: 用于汇总所有摘要生成最终总结的模型ID
 
 ## 项目结构
 
 - `0_wechat_news_url.py` - 从SQLite数据库提取微信公众号文章URL
 - `0_techcrunch_news_url.py` - 从TechCrunch网站抓取文章URL
-- `1_url_to_abstract_md.py` - 处理URL列表并生成摘要Markdown文件
+- `1a_url_to_article.py` - 从URL提取文章内容并保存
+- `1b_article_to_abstract_md.py` - 读取文章内容并生成摘要Markdown文件
+- `1_url_to_abstract_md_wrapper.py` - 协调`1a`和`1b`处理URL列表
 - `2_abstract_md_to_summary.py` - 合并摘要Markdown文件并生成最终摘要
 - `3_md_to_pdf.py` - 将Markdown文件转换为PDF格式
 - `run_ai_news_pipeline.sh` - 一键运行整个处理流程的脚本
@@ -68,44 +66,53 @@ MODEL_ID_SUMMARY=your_summary_model_id_here
 
 ### 单独运行各组件
 
-1. 提取微信公众号文章URL:
+1. 提取微信公众号文章URL (生成 `url/wechat_news_urls_*.txt`):
 ```bash
 python 0_wechat_news_url.py
 ```
 
-2. 抓取TechCrunch文章URL:
+2. 抓取TechCrunch文章URL (生成 `url/techcrunch_news_urls_*.txt`):
 ```bash
 python 0_techcrunch_news_url.py
 ```
 
-3. 处理URL列表生成摘要:
+3. 处理URL列表生成摘要 (需要提供URL文件路径, 生成 `abstract_md/abstract_md_*.md`):
 ```bash
-python 1_url_to_abstract_md.py url/news_urls.txt
+# 处理微信URL
+python 1_url_to_abstract_md_wrapper.py url/wechat_news_urls_YYYYMMDD_HHMMSS.txt
+# 处理TechCrunch URL
+python 1_url_to_abstract_md_wrapper.py url/techcrunch_news_urls_YYYYMMDD_HHMMSS.txt
 ```
+   *注意：请将 `YYYYMMDD_HHMMSS` 替换为实际生成的文件名中的时间戳。脚本 `1a` 会将文章内容存入 `article_content/`。*
 
-4. 合并摘要并生成最终摘要:
+4. 合并摘要并生成最终摘要 (需要提供摘要文件路径, 生成 `deliverable/summary_*.md`):
 ```bash
-python 2_abstract_md_to_summary.py abstract_md/file1.md abstract_md/file2.md
+# 合并微信和TechCrunch的摘要
+python 2_abstract_md_to_summary.py abstract_md/abstract_md_wechat_*.md abstract_md/abstract_md_techcrunch_*.md
 ```
+   *注意：请将 `*` 替换为实际生成的文件名中的标识符或时间戳。*
 
-5. 将Markdown转换为PDF:
+5. 将Markdown转换为PDF (需要提供Markdown文件路径, 生成同名 `.pdf` 文件):
 ```bash
-python 3_md_to_pdf.py deliverable/summary.md
+python 3_md_to_pdf.py deliverable/summary_YYYYMMDD_HHMMSS.md
 ```
+   *注意：请将 `YYYYMMDD_HHMMSS` 替换为实际生成的文件名中的时间戳。*
 
 ### 一键运行整个流程
 
-使用提供的shell脚本一键执行整个处理流程:
+使用提供的shell脚本一键执行整个处理流程。该脚本会自动处理文件查找和传递:
 
 ```bash
-chmod +x run_ai_news_pipeline.sh  # 确保脚本有执行权限
+chmod +x run_ai_news_pipeline.sh  # 确保脚本有执行权限 (仅首次需要)
 ./run_ai_news_pipeline.sh
 ```
+*该脚本会按顺序执行步骤1到5，自动查找最新生成的URL和摘要文件作为后续步骤的输入。*
 
 ## 目录说明
 
 - `url/` - 存储URL文件的目录
-- `abstract_md/` - 存储从URL生成的摘要Markdown文件
+- `article_content/` - 存储从URL提取的原始文章内容
+- `abstract_md/` - 存储从文章内容生成的摘要Markdown文件
 - `deliverable/` - 存储最终生成的摘要文件（Markdown和PDF）
 - `system_prompt/` - 存储系统提示模板
 

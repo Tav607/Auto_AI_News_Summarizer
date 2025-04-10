@@ -24,16 +24,16 @@ python 0_techcrunch_news_url.py
 TECHCRUNCH_URL_FILE=$(ls -t url/techcrunch_news_urls_*.txt | head -n 1)
 echo "TechCrunch URLs saved to $TECHCRUNCH_URL_FILE"
 
-# Step 3: Process WeChat URLs with 1_url_to_abstract_md.py
+# Step 3: Process WeChat URLs with the updated wrapper script
 echo "Step 3: Processing WeChat URLs to abstract markdown..."
-python 1_url_to_abstract_md.py "$WECHAT_URL_FILE"
-# Find the most recent abstract file - adjusting pattern to match actual output
+python 1_url_to_abstract_md_wrapper.py "$WECHAT_URL_FILE"
+# Find the most recent abstract file
 WECHAT_MD_FILE=$(ls -t abstract_md/abstract_md_*.md | head -n 1)
 echo "WeChat abstracts saved to $WECHAT_MD_FILE"
 
-# Step 4: Process TechCrunch URLs with 1_url_to_abstract_md.py
+# Step 4: Process TechCrunch URLs with the updated wrapper script
 echo "Step 4: Processing TechCrunch URLs to abstract markdown..."
-python 1_url_to_abstract_md.py "$TECHCRUNCH_URL_FILE"
+python 1_url_to_abstract_md_wrapper.py "$TECHCRUNCH_URL_FILE"
 # Find the most recent abstract file after processing TechCrunch URLs
 # We need to find a different file than the one used for WeChat
 LATEST_MD_FILES=$(ls -t abstract_md/abstract_md_*.md | head -n 2)

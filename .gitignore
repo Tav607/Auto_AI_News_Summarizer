@@ -33,4 +33,6 @@ abstract_md/*
 url/*
 !url/.gitkeep
 deliverable/*
-!deliverable/.gitkeep 
+!deliverable/.gitkeep
+article_content/*
+!article_content/.gitkeep 

@@ -8,7 +8,6 @@ from datetime import datetime
 import time
 from dotenv import load_dotenv
 from pathlib import Path
-from threading import Lock
 import shutil
 
 # 如果你是用 volces-openai-sdk，请安装并导入它
@@ -17,43 +16,6 @@ try:
 except ImportError:
     print("请先安装相应的 SDK, 例如: pip install openai 或检查引用。")
     sys.exit(1)
-
-# 速率限制器实现
-class RateLimiter:
-    def __init__(self, max_per_second=1, max_per_minute=60):
-        self.max_per_second = max_per_second
-        self.max_per_minute = max_per_minute
-        self.second_count = 0
-        self.minute_count = 0
-        self.last_reset_second = time.time()
-        self.last_reset_minute = time.time()
-        self.lock = Lock()
-    
-    def reset_if_needed(self):
-        current_time = time.time()
-        with self.lock:
-            # 重置秒级计数器
-            if current_time - self.last_reset_second >= 1:
-                self.second_count = 0
-                self.last_reset_second = current_time
-            
-            # 重置分钟级计数器
-            if current_time - self.last_reset_minute >= 60:
-                self.minute_count = 0
-                self.last_reset_minute = current_time
-    
-    def acquire(self):
-        while True:
-            self.reset_if_needed()
-            with self.lock:
-                if self.second_count < self.max_per_second and self.minute_count < self.max_per_minute:
-                    self.second_count += 1
-                    self.minute_count += 1
-                    return
-            time.sleep(0.1)  # 等待一小段时间后重试
-
-# 创建全局限流器
-rate_limiter = RateLimiter()
 
 def combine_markdown_files(file1_path, file2_path, output_dir=None):
     """
@@ -108,18 +70,21 @@ def generate_summary(client, model_id, markdown_content):
     返回:
         summary_text: 生成的摘要文本
     """
-    MAX_RETRIES = 3
+    MAX_RETRIES = 5
     retry_count = 0
     
+    # 读取系统提示文件
+    with open('./system_prompt/summary_prompt.md', 'r', encoding='utf-8') as f:
+        prompt = f.read()
+
     while retry_count < MAX_RETRIES:
         try:
-            # 获取速率限制许可
-            rate_limiter.acquire()
-            
             # 调用API
             completion = client.chat.completions.create(
                 model=model_id,
-                messages=[{"role": "user", "content": markdown_content}],
+                messages=[
+                    {"role": "system", "content": prompt},
+                    {"role": "user", "content": markdown_content}],
             )
             
             summary_text = completion.choices[0].message.content
@@ -208,7 +173,7 @@ def main():
     
     # 初始化API客户端
     client = OpenAI(
-        base_url="https://ark.cn-beijing.volces.com/api/v3/bots",
+        base_url="https://ark.cn-beijing.volces.com/api/v3",
         api_key=api_key,
     )
     
