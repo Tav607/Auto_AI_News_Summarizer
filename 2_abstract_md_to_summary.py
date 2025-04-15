@@ -133,7 +133,7 @@ def create_deliverable_file(summary_text, combined_file_path):
     title = f"# AI News Update - {display_date}\n\n"
     
     # 合并内容
-    deliverable_content = title + "## Weekly Summary\n\n" + summary_text + "\n\n## News Abstracts\n\n" + combined_content
+    deliverable_content = title + "## Weekly Summary\n\n" + summary_text + "\n\n---\n\n" + "## News Abstracts\n\n" + combined_content
     
     # 写入最终文件
     with open(deliverable_file_path, 'w', encoding='utf-8') as f_out:
