@@ -21,11 +21,8 @@ def extract_recent_news_urls(db_path, hours_back=168, output_dir=None):
     now = datetime.datetime.now()
     target_time = now.replace(hour=17, minute=0, second=0, microsecond=0)
     
-    # If current time is past 17:00, use 17:00 of today
-    # Otherwise use 17:00 of the previous day
-    if now.hour >= 17:
-        pass
-    else:
+    # If current time is before 17:00, use 17:00 of the previous day
+    if now.hour < 17:
         target_time = target_time - datetime.timedelta(days=1)
     
     start_time = target_time - datetime.timedelta(hours=hours_back)
@@ -49,12 +46,9 @@ def extract_recent_news_urls(db_path, hours_back=168, output_dir=None):
     articles = cursor.fetchall()
     conn.close()
     
-    # Format URLs by adding the prefix to article IDs
-    urls = []
-    for article_id, timestamp in articles:
-        url = f"https://mp.weixin.qq.com/s/{article_id}"
-        publish_date = datetime.datetime.fromtimestamp(timestamp)
-        urls.append((url, publish_date))
+    # Format URLs and create list of (url, publish_date) tuples
+    urls = [(f"https://mp.weixin.qq.com/s/{article_id}", datetime.datetime.fromtimestamp(timestamp)) 
+            for article_id, timestamp in articles]
     
     # Sort by publish time (newest first)
     urls.sort(key=lambda x: x[1], reverse=True)
@@ -62,7 +56,7 @@ def extract_recent_news_urls(db_path, hours_back=168, output_dir=None):
     # Extract just the URLs
     url_list = [url for url, _ in urls]
     
-    # Create output directory if it doesn't exist
+    # Output results
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
         current_date = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")

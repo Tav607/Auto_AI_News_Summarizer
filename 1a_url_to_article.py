@@ -3,7 +3,6 @@
 
 import os
 import sys
-import pandas as pd
 import time
 import math
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -17,6 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException, NoSuchElementException, StaleElementReferenceException
 from bs4 import BeautifulSoup
 import re
+import hashlib
 from pathlib import Path
 
 def setup_chrome_driver(headless=True):
@@ -79,7 +79,6 @@ def generate_filename_from_url(url):
             return parts[-1]
         else:
             # 如果URL结构不符合预期，使用域名和时间戳
-            import hashlib
             return f"techcrunch_{hashlib.md5(url.encode()).hexdigest()[:10]}"
     
     # 对于微信文章URL，提取s参数
@@ -89,12 +88,10 @@ def generate_filename_from_url(url):
             return url.split('/s/')[-1]
         else:
             # 对于格式如 https://mp.weixin.qq.com/s?__biz=xxx&mid=xxx&idx=xxx
-            import hashlib
             return f"wechat_{hashlib.md5(url.encode()).hexdigest()[:10]}"
     
     # 对于其他URL，使用MD5哈希的前10位字符
     else:
-        import hashlib
         return f"article_{hashlib.md5(url.encode()).hexdigest()[:10]}"
 
 def scrape_article(url, output_path, progress_callback=None):
@@ -222,8 +219,18 @@ def scrape_article(url, output_path, progress_callback=None):
                         raise Exception(f"未检测到验证提示，也未检测到主要内容 (URL: {url}), 可能加载失败。")
 
             elif "techcrunch.com" in url:
-                # TechCrunch只需要较短的加载时间，这里使用1秒
-                time.sleep(1)
+                # TechCrunch: Use WebDriverWait instead of time.sleep
+                try:
+                    # Wait up to 15 seconds for the main article header (h1) to be present
+                    WebDriverWait(driver, 15).until(
+                        EC.presence_of_element_located((By.TAG_NAME, "h1"))
+                    )
+                    message = f"TechCrunch page loaded, found H1 (URL: {url})"
+                    print(message)
+                    if progress_callback: progress_callback(message)
+                except TimeoutException:
+                    # If title doesn't appear, raise exception to trigger retry
+                    raise Exception(f"TechCrunch page load timeout or H1 not found within 15s (URL: {url})")
             else:
                 # 其他网站使用默认等待时间
                 time.sleep(2)
@@ -263,7 +270,7 @@ def scrape_article(url, output_path, progress_callback=None):
                             article_text += "\n"
                     else:
                         article_text += "\n"
-                except Exception as e:
+                except Exception:
                     # 如果解析日期出错，添加一个空行
                     article_text += "\n"
                 
@@ -286,7 +293,7 @@ def scrape_article(url, output_path, progress_callback=None):
                 # 微信文章内容提取
                 article_text = ""
                 
-                # 获取文章标题 - 基于notepad结构
+                # 获取文章标题
                 title_element = soup.select_one("h1.rich_media_title, #activity-name")
                 if title_element:
                     article_text += title_element.get_text().strip() + "\n\n"
@@ -343,7 +350,7 @@ def scrape_article(url, output_path, progress_callback=None):
                             backup_text = content_soup.get_text(separator='\n\n', strip=True)
                             if len(backup_text) > len(text_content):
                                 text_content = backup_text
-                    except Exception as e:
+                    except Exception:
                         pass
             else:
                 # 对于其他网站，使用通用方法
@@ -423,8 +430,7 @@ def main(input_txt, output_dir=None, progress_callback=None):
         output_dir = output_dir / f"articles_{timestamp}"
     
     # 确保输出目录存在
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    os.makedirs(output_dir, exist_ok=True)
     
     # 读取包含URL的文件
     if not os.path.exists(input_txt):
@@ -469,7 +475,7 @@ def main(input_txt, output_dir=None, progress_callback=None):
                 progress_callback(message)
             
             future_to_url = {}
-            for i, url in enumerate(batch_urls):
+            for url in batch_urls:
                 # 从URL生成文件名
                 url_id = generate_filename_from_url(url)
                 article_path = os.path.join(output_dir, f"{url_id}.txt")

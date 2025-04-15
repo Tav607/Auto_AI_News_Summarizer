@@ -5,16 +5,12 @@ import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import math
-import configparser
 from datetime import datetime
 from dotenv import load_dotenv
 import time
 from threading import Lock
 from pathlib import Path
 
-# 如果你是用 volces-openai-sdk，请安装并导入它
-# from openai import OpenAI
-# 这里仅作示例:
 try:
     from openai import OpenAI
 except ImportError:
@@ -76,7 +72,6 @@ def generate_abstract_from_article(client, model_id, article_path, batch_idx, pr
             progress_callback(error_message)
         return (batch_idx, None, error_message)
     
-    # 添加提示语，要求生成Markdown格式的摘要
     # 读取系统提示文件
     with open('./system_prompt/abstract_prompt.md', 'r', encoding='utf-8') as f:
         prompt = f.read()
@@ -92,6 +87,8 @@ def generate_abstract_from_article(client, model_id, article_path, batch_idx, pr
                     {"role": "system", "content": prompt},
                     {"role": "user", "content": article_content},
                 ],
+                max_tokens=500,
+                temperature=0.5
             )
             md_text = completion.choices[0].message.content
             
@@ -99,7 +96,7 @@ def generate_abstract_from_article(client, model_id, article_path, batch_idx, pr
             if not md_text.startswith('#'):
                 start_hash = md_text.find('#')
                 if start_hash != -1:
-                    md_text = md_text[start_hash:]  # 去除所有 # 之前的冗余文本
+                    md_text = md_text[start_hash:]
             
             return (batch_idx, md_text, None)
         
@@ -114,7 +111,6 @@ def generate_abstract_from_article(client, model_id, article_path, batch_idx, pr
             
             if retry_count < MAX_RETRIES:
                 time.sleep(1)  # 延迟一秒后重试
-                continue
             else:
                 final_error_message = f"Article#{batch_idx}: 已达到最大重试次数，放弃处理此文章..."
                 print(final_error_message)
@@ -148,11 +144,12 @@ def main(input_articles_file, output_md=None, progress_callback=None):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_md = str(output_dir / f"abstract_md_{timestamp}.md")
 
-    # 1. 从.env文件加载环境变量
+    # 从.env文件加载环境变量
     load_dotenv()
     
-    api_key = os.getenv("API_KEY")
-    model_id_abstract = os.getenv("MODEL_ID_ABSTRACT")
+    api_key = os.getenv("Volcengine_API_KEY")
+    model_id = os.getenv("Volcengine_MODEL_ID")
+    base_url = os.getenv("Volcengine_BASE_URL")
     
     # 固定max_workers为20
     max_workers = 20
@@ -165,20 +162,20 @@ def main(input_articles_file, output_md=None, progress_callback=None):
             progress_callback(message)
         sys.exit(1)
         
-    if not model_id_abstract:
-        message = "未找到MODEL_ID_ABSTRACT环境变量，请检查.env文件！"
+    if not model_id:
+        message = "未找到MODEL_ID环境变量，请检查.env文件！"
         print(message)
         if progress_callback:
             progress_callback(message)
         sys.exit(1)
 
-    # 2. 初始化客户端
+    # 初始化客户端
     client = OpenAI(
-        base_url="https://ark.cn-beijing.volces.com/api/v3",
+        base_url=base_url,
         api_key=api_key,
     )
 
-    # 3. 读取包含文章路径的文件
+    # 读取包含文章路径的文件
     if not os.path.exists(input_articles_file):
         message = f"输入文件 {input_articles_file} 不存在！"
         print(message)
@@ -196,7 +193,7 @@ def main(input_articles_file, output_md=None, progress_callback=None):
     if progress_callback:
         progress_callback(message)
 
-    # 4. 并行调用 API
+    # 并行调用 API
     results = []  # 用于存放 (idx, md_text) 的结果
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         for batch in range(total_batches):
@@ -216,7 +213,7 @@ def main(input_articles_file, output_md=None, progress_callback=None):
                 future = executor.submit(
                     generate_abstract_from_article, 
                     client, 
-                    model_id_abstract, 
+                    model_id, 
                     article_path, 
                     start_idx+i, 
                     progress_callback
@@ -250,7 +247,7 @@ def main(input_articles_file, output_md=None, progress_callback=None):
     if progress_callback:
         progress_callback(completion_message)
 
-    # 5. 按照原先顺序 (idx) 排序并合并所有 Markdown
+    # 按照原先顺序 (idx) 排序并合并所有 Markdown
     results.sort(key=lambda x: x[0])
     merged_md = "\n\n".join(r[1] for r in results if r[1])
 
@@ -261,7 +258,7 @@ def main(input_articles_file, output_md=None, progress_callback=None):
             progress_callback(empty_message)
         return
 
-    # 6. 将合并后的 Markdown 内容写入 .md 文件
+    # 将合并后的 Markdown 内容写入 .md 文件
     try:
         # 确保输出目录存在
         output_dir = os.path.dirname(output_md)

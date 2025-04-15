@@ -85,6 +85,7 @@ def generate_summary(client, model_id, markdown_content):
                 messages=[
                     {"role": "system", "content": prompt},
                     {"role": "user", "content": markdown_content}],
+                temperature=0.5,
             )
             
             summary_text = completion.choices[0].message.content
@@ -118,10 +119,10 @@ def create_deliverable_file(summary_text, combined_file_path):
     deliverable_dir = os.path.join(os.getcwd(), "deliverable")
     os.makedirs(deliverable_dir, exist_ok=True)
     
-    # 生成带日期的文件名 (格式: AI_News_Update_YYYYMMDD.md)
-    today_date = datetime.now().strftime("%Y%m%d")
+    # 生成带日期的文件名 (格式: AI News Update YYYY MM DD.md)
+    today_date = datetime.now().strftime("%Y %m %d")
     display_date = datetime.now().strftime("%Y/%m/%d")
-    deliverable_filename = f"AI_News_Update_{today_date}.md"
+    deliverable_filename = f"AI News Update {today_date}.md"
     deliverable_file_path = os.path.join(deliverable_dir, deliverable_filename)
     
     # 读取合并的摘要源文件
@@ -157,8 +158,9 @@ def main():
     # 从.env文件加载环境变量
     load_dotenv()
     
-    api_key = os.getenv("API_KEY")
-    model_id = os.getenv("MODEL_ID_SUMMARY")
+    api_key = os.getenv("Google_API_KEY")
+    model_id = os.getenv("Google_MODEL_ID")
+    base_url = os.getenv("Google_BASE_URL")
     
     if not api_key or not model_id:
         print("未找到API_KEY或MODEL_ID_SUMMARY环境变量，请检查.env文件！")
@@ -173,7 +175,7 @@ def main():
     
     # 初始化API客户端
     client = OpenAI(
-        base_url="https://ark.cn-beijing.volces.com/api/v3",
+        base_url=base_url,
         api_key=api_key,
     )
     

@@ -46,20 +46,14 @@ def get_article_urls_from_page(url, days=7):
                 
                 # If no title link, try any links in the article
                 if not link:
-                    links = article.select('a[href]')
-                    for a_tag in links:
+                    for a_tag in article.select('a[href]'):
                         href = a_tag.get('href', '')
                         # Simple heuristic to identify article links
-                        if '/2025/' in href or '/2024/' in href:
-                            if '/category/' not in href and '/tag/' not in href:
-                                link = href
-                                break
+                        if ('/2025/' in href or '/2024/' in href) and '/category/' not in href and '/tag/' not in href:
+                            link = href
+                            break
                 
-                if not link:
-                    continue
-                
-                # Skip category/tag pages
-                if '/category/' in link or '/tag/' in link:
+                if not link or '/category/' in link or '/tag/' in link:
                     continue
                 
                 # Determine the article date
@@ -90,8 +84,6 @@ def get_article_urls_from_page(url, days=7):
                 # For special URL patterns like tech-layoffs list that might be regularly updated 
                 # but have a fixed date in URL, we need special handling
                 if '/tech-layoffs' in link and article_date:
-                    # For these URLs, we'll check if there's an updated date in the page title or meta data
-                    # For now, we'll just print a warning
                     print(f"Warning: Found special URL pattern that might be updated regularly: {link}")
                     # If we can't determine last update date, we'll be conservative
                     if article_date < cutoff_date:
@@ -114,13 +106,8 @@ def get_article_urls_from_page(url, days=7):
                         print(f"Error parsing date from URL: {e}")
                 
                 # For debugging: print the article URL and date
-                if article_date:
-                    date_display = article_date.strftime('%Y-%m-%d')
-                else:
-                    date_display = 'unknown date'
-                
-                # Only print the first few for debugging
                 if article_count <= 5:
+                    date_display = article_date.strftime('%Y-%m-%d') if article_date else 'unknown date'
                     in_range_text = "✓" if is_within_range else "✗"
                     print(f"Article {article_count}: {link} - {date_display} {in_range_text}")
                 
@@ -128,8 +115,7 @@ def get_article_urls_from_page(url, days=7):
                 results.append((link, article_date, is_within_range))
         else:
             # Last resort: look for article links directly
-            article_links = soup.select('a[href*="/2025/"], a[href*="/2024/"]')
-            for link in article_links:
+            for link in soup.select('a[href*="/2025/"], a[href*="/2024/"]'):
                 href = link.get('href', '')
                 if '/category/' in href or '/tag/' in href or href.endswith('/page/'):
                     continue
@@ -200,16 +186,13 @@ def main():
     
     all_articles = []
     current_page = 1
-    old_article_threshold = 5  # 如果一页中有超过这个数量的旧文章，考虑停止
+    old_article_threshold = 10  # 如果一页中有超过这个数量的旧文章，考虑停止
     consecutive_old_pages = 0  # 连续包含大量旧文章的页面数
     
     # Process all pages and check dates for each article
     while current_page <= args.max_pages:
         # Construct page URL
-        if current_page == 1:
-            page_url = base_url
-        else:
-            page_url = f"{base_url}/page/{current_page}/"
+        page_url = base_url if current_page == 1 else f"{base_url}/page/{current_page}/"
         
         print(f"\nScraping page {current_page}: {page_url}")
         

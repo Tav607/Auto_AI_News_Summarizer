@@ -12,8 +12,16 @@ def md_to_pdf(md_file):
         return False
     
     # Get the base name without extension for output file
-    base_name = os.path.splitext(md_file)[0]
-    pdf_file = f"{base_name}.pdf"
+    base_name_with_ext = os.path.basename(md_file) # Get filename with extension
+    base_name = os.path.splitext(base_name_with_ext)[0] # Get base name
+    
+    # Define output directory as the same directory where the markdown file resides
+    output_dir = os.path.dirname(md_file) 
+    # Ensure the directory exists (it should, if the input file exists)
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Construct the PDF filename using the base name and place it in the correct output directory
+    pdf_file = os.path.join(output_dir, f"{base_name}.pdf")
     
     try:
         # Read markdown content

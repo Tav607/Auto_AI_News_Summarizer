@@ -50,23 +50,23 @@ echo "Step 5: Generating combined summary from abstracts..."
 # Check if both files exist before proceeding
 if [ -f "$WECHAT_MD_FILE" ] && [ -f "$TECHCRUNCH_MD_FILE" ]; then
     python 2_abstract_md_to_summary.py "$WECHAT_MD_FILE" "$TECHCRUNCH_MD_FILE"
-    # Check for summary files with correct pattern
-    SUMMARY_FILE=$(ls -t deliverable/summary_*.md 2>/dev/null | head -n 1)
+    # Find the summary file using the new naming pattern
+    SUMMARY_FILE=$(ls -t deliverable/"AI News Update "*.md 2>/dev/null | head -n 1)
+    # Check if summary file was found
     if [ -z "$SUMMARY_FILE" ]; then
-        # Try alternate pattern if the first one doesn't find anything
-        SUMMARY_FILE=$(ls -t deliverable/*.md 2>/dev/null | head -n 1)
-    fi
-    echo "Summary saved to $SUMMARY_FILE"
-
-    # Step 6: Convert summary markdown to PDF
-    echo "Step 6: Converting summary to PDF..."
-    if [ -f "$SUMMARY_FILE" ]; then
-        python 3_md_to_pdf.py "$SUMMARY_FILE"
-        PDF_FILE="${SUMMARY_FILE%.md}.pdf"
-        echo "PDF saved to $PDF_FILE"
+        echo "Error: Could not find the summary file with pattern 'AI News Update *.md' in deliverable/"
     else
-        echo "Error: Summary file not found. Cannot proceed to PDF conversion."
-    fi
+        echo "Summary saved to $SUMMARY_FILE"
+
+        # Step 6: Convert summary markdown to PDF
+        echo "Step 6: Converting summary to PDF..."
+        python 3_md_to_pdf.py "$SUMMARY_FILE"
+        # PDF file is now correctly placed in deliverable by 3_md_to_pdf.py
+        # Extract the PDF filename based on the summary filename
+        PDF_FILE="$SUMMARY_FILE"
+        PDF_FILE="${PDF_FILE%.md}.pdf"
+        echo "PDF saved to $PDF_FILE"
+    fi # End of check for SUMMARY_FILE
 else
     echo "Error: One or both abstract files are missing. Cannot proceed to summary generation."
     echo "WeChat file: $WECHAT_MD_FILE"

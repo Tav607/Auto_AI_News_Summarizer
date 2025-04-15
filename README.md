@@ -33,23 +33,33 @@ pip install -r requirements.txt
 
 ## 环境变量配置
 
-项目使用`.env`文件管理API密钥和配置。
+项目使用`.env`文件管理API密钥和配置。**请参考 `.env.example` 文件获取最新的变量列表和格式。**
 
 ### 设置步骤:
 
-1. 在项目根目录创建一个名为`.env`的文件
-2. 添加以下内容，替换为您的实际值:
+1. **复制 `.env.example` 为 `.env`**:
+   ```bash
+   cp .env.example .env
+   ```
+2. **编辑 `.env` 文件**, 替换占位符为您的实际值:
+```dotenv
+# Example for Volcengine service used in abstract generation
+Volcengine_API_KEY="YOUR_VOLCENGINE_API_KEY"
+Volcengine_MODEL_ID="YOUR_VOLCENGINE_MODEL_ID" # e.g., doubao-pro-32k
+Volcengine_BASE_URL="https://ark.cn-beijing.volces.com/api/v3" # Or your region's endpoint
+
+# Example for Google service used in final summarization
+Google_API_KEY="YOUR_GOOGLE_API_KEY"
+Google_MODEL_ID="YOUR_GOOGLE_MODEL_ID" # e.g., gemini-1.5-flash-latest
+Google_BASE_URL="YOUR_GOOGLE_BASE_URL" # e.g., https://generativelanguage.googleapis.com/v1beta/models/
 ```
-API_KEY=your_api_key_here
-MODEL_ID_ABSTRACT=your_model_id_for_abstraction
-MODEL_ID_SUMMARY=your_model_id_for_summary
-```
+   *注意: 根据您在 `1b_article_to_abstract_md.py` 和 `2_abstract_md_to_summary.py` 中配置的客户端，填写对应的 API Key, Model ID, 和 Base URL。*
 
 ### 环境变量说明:
 
-- `API_KEY`: DeepSeek API密钥 (或您使用的其他LLM服务商的密钥)
-- `MODEL_ID_ABSTRACT`: 用于生成单篇文章摘要的模型ID
-- `MODEL_ID_SUMMARY`: 用于汇总所有摘要生成最终总结的模型ID
+- `*_API_KEY`: 您使用的 LLM 服务商提供的 API 密钥。
+- `*_MODEL_ID`: 用于生成摘要或总结的模型 ID。
+- `*_BASE_URL`: LLM 服务商的 API 端点 URL。
 
 ## 项目结构
 
