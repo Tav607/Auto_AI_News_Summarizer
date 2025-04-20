@@ -27,9 +27,6 @@ venv/
 # logs
 cron_log.txt
 
-# Test scripts
-run_ai_news_pipeline_test.sh
-
 # Ignore contents but keep directories with .gitkeep
 abstract_md/*
 !abstract_md/.gitkeep
@@ -37,5 +34,5 @@ url/*
 !url/.gitkeep
 deliverable/*
 !deliverable/.gitkeep
-article_content/*
-!article_content/.gitkeep 
+articles/*
+!articles/.gitkeep 
