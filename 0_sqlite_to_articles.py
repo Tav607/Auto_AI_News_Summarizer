@@ -47,6 +47,8 @@ def main():
     WHERE e.date BETWEEN ? AND ?
       AND (
         f.name = 'TechCrunch AI News'
+        OR f.name = 'Reuters AI News'
+        OR f.name = 'The Verge - AI'
         OR (f.category = 2 AND f.url LIKE '%wechat2rss%')
       )
     ORDER BY e.date DESC
