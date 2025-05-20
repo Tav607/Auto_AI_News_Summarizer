@@ -41,13 +41,31 @@ This tool automatically extracts AI-related articles from a FreshRSS SQLite data
 
 ## Configuration
 
-Create a `.env` file in the project root with the following content:
+Create a `.env` file in the project root. The `run.sh` script and individual Python scripts will load configurations from this file.
 
 ```dotenv
-# Path to the FreshRSS SQLite database file
+# --- General Configuration ---
+# Path to the FreshRSS SQLite database file.
+# This is used by `run.sh` and is the primary way to set the DB path.
+# `0_sqlite_to_articles.py` will use the --db argument if provided by `run.sh`,
+# otherwise, it will fall back to this DB_PATH from the .env file.
 DB_PATH=/path/to/freshrss.db
 
-# Volcengine service configuration (for abstract generation)
+# --- Article Extraction (0_sqlite_to_articles.py) ---
+# Comma-separated list of exact feed names to include.
+# This is a **MANDATORY** setting. Example: "TechCrunch AI News,Reuters AI News,The Verge - AI"
+ALLOWED_FEED_NAMES="YOUR_ALLOWED_FEED_NAMES_HERE"
+
+# Optional: Category ID for WeChat articles (or similar) to be included.
+# Defaults to "0" if not set.
+WECHAT_CATEGORY_ID="where_you_put_your_wechat_rss"
+
+# Optional: A string that should be present in the URL for WeChat articles (or similar).
+# This is used in a LIKE '%value%' SQL clause.
+# Defaults to "wechat" if not set.
+WECHAT_URL_PATTERN_CONTAINS="wechat2rss_or_other_service_provider"
+
+# --- Volcengine service configuration (for abstract generation) ---
 Volcengine_API_KEY="YOUR_VOLCENGINE_API_KEY"
 Volcengine_MODEL_ID="YOUR_VOLCENGINE_MODEL_ID"
 Volcengine_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
@@ -104,8 +122,10 @@ Make the pipeline script executable and run:
 
 ```bash
 chmod +x run.sh
-./run.sh --db <DB_PATH> [--hours <hours>] [--end-hour <end_hour>]
+./run.sh [--db <DB_PATH>] [--hours <hours>] [--end-hour <end_hour>]
 ```
+
+If `--db` is not provided, the script will attempt to use `DB_PATH` from the `.env` file.
 
 ## Notes
 
