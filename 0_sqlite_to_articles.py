@@ -17,7 +17,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Extract and format articles from FreshRSS SQLite DB")
     parser.add_argument("--db", help="Path to FreshRSS SQLite database file (overrides DB_PATH in .env)")
     parser.add_argument("--hours", type=int, default=168, help="Time window in hours (default: 168)")
-    parser.add_argument("--end-hour", type=int, default=18, help="End hour of day (0-23) for the window end (default: 18)")
+    parser.add_argument("--end-hour", type=int, default=17, help="End hour of day (0-23) for the window end (default: 17)")
     return parser.parse_args()
 
 

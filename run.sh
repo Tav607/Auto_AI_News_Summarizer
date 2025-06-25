@@ -7,7 +7,7 @@ print_usage() { echo "Usage: $0 --db <DB_PATH> [--hours <hours>] [--end-hour <en
 # Default parameters
 DB_PATH="${DB_PATH:-$(grep DB_PATH .env | cut -d '=' -f2)}"
 HOURS=168
-END_HOUR=18
+END_HOUR=17
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -30,7 +30,7 @@ fi
 cd "$(dirname "$0")"
 
 echo "Activating virtual environment..."
-source venv/bin/activate
+source .venv/bin/activate
 
 echo "Installing dependencies..."
 pip install -r requirements.txt
@@ -72,6 +72,9 @@ if [[ ! -f "$PDF_FILE" ]]; then
     exit 1
 fi
 echo "PDF file: $PDF_FILE"
+
+echo "Step 5: Uploading to Dropbox..."
+python 4_save_to_dropbox.py "$SUMMARY_MD" "$PDF_FILE"
 
 echo "Pipeline completed successfully!"
 

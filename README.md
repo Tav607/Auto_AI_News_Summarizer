@@ -9,6 +9,7 @@ This tool automatically extracts AI-related articles from a FreshRSS SQLite data
 - Merge abstracts to produce a weekly summary Markdown file
 - Convert Markdown documents to PDF
 - Support parallel processing for improved performance
+- Automatically upload summary Markdown and PDF files to Dropbox
 
 ## Requirements
 
@@ -74,6 +75,10 @@ Volcengine_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
 Google_API_KEY="YOUR_GOOGLE_API_KEY"
 Google_MODEL_ID="YOUR_GOOGLE_MODEL_ID"
 Google_BASE_URL="https://generativelanguage.googleapis.com/v1beta/models/"
+
+## --- Dropbox Configuration (for file upload) ---
+DROPBOX_ACCESS_TOKEN="YOUR_DROPBOX_APP_ACCESS_TOKEN"
+DROPBOX_TARGET_DIR="/Your/Target/Directory"
 ```
 
 Ensure the environment variables are correctly set before running any script.
@@ -86,6 +91,7 @@ Ensure the environment variables are correctly set before running any script.
 ├── 1_article_to_abstract_md.py     # Generate article abstracts in Markdown
 ├── 2_abstract_to_summary.py        # Compile abstracts into a weekly summary
 ├── 3_md_to_pdf.py                  # Convert Markdown to PDF
+├── 4_save_to_dropbox.py            # Upload files to Dropbox
 ├── run.sh                          # Run the entire pipeline with one command
 ├── articles/                       # Stores extracted article text files
 ├── abstract_md/                    # Stores generated abstract Markdown files
