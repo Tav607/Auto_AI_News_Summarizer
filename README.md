@@ -9,7 +9,7 @@ This tool automatically extracts AI-related articles from a FreshRSS SQLite data
 - Merge abstracts to produce a weekly summary Markdown file
 - Convert Markdown documents to PDF
 - Support parallel processing for improved performance
-- Automatically upload summary Markdown and PDF files to Dropbox
+- Automatically upload summary Markdown and PDF files to the root of the Dropbox App folder
 
 ## Requirements
 
@@ -78,7 +78,6 @@ Google_BASE_URL="https://generativelanguage.googleapis.com/v1beta/models/"
 
 ## --- Dropbox Configuration (for file upload) ---
 DROPBOX_ACCESS_TOKEN="YOUR_DROPBOX_APP_ACCESS_TOKEN"
-DROPBOX_TARGET_DIR="/Your/Target/Directory"
 ```
 
 Ensure the environment variables are correctly set before running any script.

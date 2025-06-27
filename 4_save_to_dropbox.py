@@ -3,11 +3,11 @@ import os
 import dropbox
 from dotenv import load_dotenv
 
-def upload_to_dropbox(file_path, target_dir, dbx):
-    """Uploads a file to a specific directory in Dropbox."""
+def upload_to_dropbox(file_path, dbx):
+    """Uploads a file to Dropbox."""
     try:
         file_name = os.path.basename(file_path)
-        dropbox_path = f"{target_dir}/{file_name}"
+        dropbox_path = f"/{file_name}"
         with open(file_path, "rb") as f:
             # Check file size, if > 150MB, use upload_session
             if os.path.getsize(file_path) > 150 * 1024 * 1024:
@@ -39,10 +39,9 @@ def main():
     # Load environment variables from .env file
     load_dotenv()
     dropbox_access_token = os.getenv("DROPBOX_ACCESS_TOKEN")
-    dropbox_target_dir = os.getenv("DROPBOX_TARGET_DIR")
 
-    if not dropbox_access_token or not dropbox_target_dir:
-        print("Error: DROPBOX_ACCESS_TOKEN and DROPBOX_TARGET_DIR must be set in .env file.")
+    if not dropbox_access_token:
+        print("Error: DROPBOX_ACCESS_TOKEN must be set in .env file.")
         return
 
     # Setup argument parser
@@ -60,7 +59,7 @@ def main():
 
     for file_path in args.files:
         if os.path.exists(file_path):
-            upload_to_dropbox(file_path, dropbox_target_dir, dbx)
+            upload_to_dropbox(file_path, dbx)
         else:
             print(f"File not found: {file_path}")
 
