@@ -56,11 +56,11 @@ def main():
     with open(args.input_md, "r", encoding="utf-8") as f:
         abstract_md = f.read()
     load_dotenv()
-    api_key = os.getenv("Google_API_KEY")
-    model_id = os.getenv("Google_MODEL_ID")
-    base_url = os.getenv("Google_BASE_URL")
+    api_key = os.getenv("Openrouter_API_KEY")
+    model_id = os.getenv("Openrouter_MODEL_ID")
+    base_url = os.getenv("Openrouter_BASE_URL")
     if not api_key or not model_id:
-        print("Missing Google_API_KEY or Google_MODEL_ID in environment.")
+        print("Missing Openrouter_API_KEY or Openrouter_MODEL_ID in environment.")
         sys.exit(1)
     client = OpenAI(api_key=api_key, base_url=base_url)
     print("Generating summary...")
