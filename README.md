@@ -66,15 +66,15 @@ WECHAT_CATEGORY_ID="where_you_put_your_wechat_rss"
 # Defaults to "wechat" if not set.
 WECHAT_URL_PATTERN_CONTAINS="wechat2rss_or_other_service_provider"
 
-# --- Volcengine service configuration (for abstract generation) ---
+# Volcengine service configuration (for abstract generation)
 Volcengine_API_KEY="YOUR_VOLCENGINE_API_KEY"
 Volcengine_MODEL_ID="YOUR_VOLCENGINE_MODEL_ID"
 Volcengine_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
 
 # Google service configuration (for weekly summary)
-Google_API_KEY="YOUR_GOOGLE_API_KEY"
-Google_MODEL_ID="YOUR_GOOGLE_MODEL_ID"
-Google_BASE_URL="https://generativelanguage.googleapis.com/v1beta/models/"
+Openrouter_API_KEY="YOUR_OPENROUTER_API_KEY"
+Openrouter_MODEL_ID="YOUR_GOOGLE_MODEL_ID"
+Openrouter_BASE_URL="https://openrouter.ai/api/v1"
 
 ## --- Dropbox Configuration (for file upload) ---
 DROPBOX_ACCESS_TOKEN="YOUR_DROPBOX_APP_ACCESS_TOKEN"
