@@ -72,9 +72,9 @@ Volcengine_MODEL_ID="YOUR_VOLCENGINE_MODEL_ID"
 Volcengine_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
 
 # Google service configuration (for weekly summary)
-Openrouter_API_KEY="YOUR_OPENROUTER_API_KEY"
-Openrouter_MODEL_ID="YOUR_GOOGLE_MODEL_ID"
-Openrouter_BASE_URL="https://openrouter.ai/api/v1"
+Gemini_API_KEY="YOUR_GEMINI_API_KEY"
+Gemini_MODEL_ID="YOUR_GEMINI_MODEL_ID"
+Gemini_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai/"
 
 ## --- Dropbox Configuration (for file upload) ---
 DROPBOX_ACCESS_TOKEN="YOUR_DROPBOX_APP_ACCESS_TOKEN"
