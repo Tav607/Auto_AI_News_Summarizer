@@ -77,10 +77,43 @@ Gemini_MODEL_ID="YOUR_GEMINI_MODEL_ID"
 Gemini_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai/"
 
 ## --- Dropbox Configuration (for file upload) ---
-DROPBOX_ACCESS_TOKEN="YOUR_DROPBOX_APP_ACCESS_TOKEN"
+DROPBOX_APP_KEY="YOUR_DROPBOX_APP_KEY"
+DROPBOX_APP_SECRET="YOUR_DROPBOX_APP_SECRET"
+DROPBOX_REFRESH_TOKEN="YOUR_DROPBOX_REFRESH_TOKEN"
 ```
 
 Ensure the environment variables are correctly set before running any script.
+
+### Dropbox Setup
+
+To enable Dropbox uploads, follow these steps to obtain your API credentials:
+
+1.  **Create a Dropbox App**:
+    *   Go to the [Dropbox App Console](https://www.dropbox.com/developers/apps) and click **Create app**.
+    *   **Choose an API**: Select "Scoped access".
+    *   **Choose the type of access**: Select either "App Folder" or "Full Dropbox".
+    *   **Name your app**: Give it a unique name (e.g., `ai-news-uploader`).
+
+2.  **Configure App Permissions**:
+    *   In your app's settings, go to the **Permissions** tab.
+    *   Under `Files and Folders`, check `files.content.read` and `files.content.write`.
+    *   Click **Submit** to save changes.
+
+3.  **Generate Refresh Token**:
+    *   Navigate back to the **Settings** tab to find your **App key** and **App secret**.
+    *   Run the helper script. Make sure you are in the project's root directory:
+        ```bash
+        python3 get_refresh_token.py
+        ```
+    *   When prompted, enter your **App key** and **App secret**.
+    *   The script will provide a URL. Open it in your browser, authorize the app, and copy the **authorization code** that Dropbox provides.
+    *   Paste the code back into your terminal.
+
+4.  **Update `.env` file**:
+    *   The script will output the `DROPBOX_APP_KEY`, `DROPBOX_APP_SECRET`, and a long-lived `DROPBOX_REFRESH_TOKEN`.
+    *   Copy these three lines into your `.env` file.
+
+After this setup, the script will be able to upload files to Dropbox without your token expiring.
 
 ## Project Structure
 
@@ -91,6 +124,7 @@ Ensure the environment variables are correctly set before running any script.
 ├── 2_abstract_to_summary.py        # Compile abstracts into a weekly summary
 ├── 3_md_to_pdf.py                  # Convert Markdown to PDF
 ├── 4_save_to_dropbox.py            # Upload files to Dropbox
+├── get_refresh_token.py            # Helper script to get Dropbox refresh token
 ├── run.sh                          # Run the entire pipeline with one command
 ├── articles/                       # Stores extracted article text files
 ├── abstract_md/                    # Stores generated abstract Markdown files

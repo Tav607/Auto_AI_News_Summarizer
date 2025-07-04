@@ -38,10 +38,12 @@ def main():
     """Main function to handle argument parsing and file uploads."""
     # Load environment variables from .env file
     load_dotenv()
-    dropbox_access_token = os.getenv("DROPBOX_ACCESS_TOKEN")
+    app_key = os.getenv("DROPBOX_APP_KEY")
+    app_secret = os.getenv("DROPBOX_APP_SECRET")
+    refresh_token = os.getenv("DROPBOX_REFRESH_TOKEN")
 
-    if not dropbox_access_token:
-        print("Error: DROPBOX_ACCESS_TOKEN must be set in .env file.")
+    if not all([app_key, app_secret, refresh_token]):
+        print("Error: DROPBOX_APP_KEY, DROPBOX_APP_SECRET, and DROPBOX_REFRESH_TOKEN must be set in the .env file.")
         return
 
     # Setup argument parser
@@ -50,7 +52,11 @@ def main():
     args = parser.parse_args()
 
     try:
-        dbx = dropbox.Dropbox(dropbox_access_token)
+        dbx = dropbox.Dropbox(
+            app_key=app_key,
+            app_secret=app_secret,
+            oauth2_refresh_token=refresh_token
+        )
         dbx.users_get_current_account()
         print("Successfully connected to Dropbox.")
     except Exception as e:
